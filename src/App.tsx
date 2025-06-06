@@ -512,12 +512,21 @@ const App: React.FC = () => {
               
               <div className="plant-search">
                 <i className="fas fa-search"></i>
-                <input 
-                  type="text" 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Bitki ara..." 
-                />
+               <input 
+  type="text" 
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+  placeholder="Bitki ara..." 
+  style={{
+    width: "100%",
+    maxWidth: "100%",
+    padding: "0.5rem",
+    boxSizing: "border-box",
+    borderRadius: "8px",
+    border: "1px solid #ccc"
+  }}
+/>
+
               </div>
               
               <div id="plantsList">

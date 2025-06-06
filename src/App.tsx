@@ -40,44 +40,7 @@ const INITIAL_PLANTS: Plant[] = [
     },
     image: "https://images.unsplash.com/photo-1564466809057-1c2e0f5fdc8d?w=400"
   },
-  {
-    id: 2,
-    name: "Sansevieria trifasciata",
-    commonName: "Kaplan Dili",
-    wateringInterval: 21,
-    difficulty: "çok kolay",
-    tips: [
-      "Çok dayanıklı bir bitki",
-      "Ayda 1-2 kez sulama yeterli",
-      "Aşırı sulamadan kaçının",
-      "Kışın daha az su verin"
-    ],
-    care: {
-      light: "Orta ışık",
-      temperature: "15-25°C",
-      humidity: "Düşük-Orta nem",
-      soil: "İyi drene olan toprak"
-    }
-  },
-  {
-    id: 3,
-    name: "Pothos aureus",
-    commonName: "Altın Pothos",
-    wateringInterval: 7,
-    difficulty: "kolay",
-    tips: [
-      "Toprak nemli tutulmalı",
-      "Yaprakları püskürtün",
-      "Hızla büyür",
-      "Düşük ışıkta da yaşar"
-    ],
-    care: {
-      light: "Parlak dolaylı ışık",
-      temperature: "18-24°C",
-      humidity: "Orta-Yüksek nem",
-      soil: "Nemli toprak"
-    }
-  }
+  
 ];
 
 const DAY_HEADERS = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
@@ -153,6 +116,216 @@ const PlantCard: React.FC<{
   );
 };
 
+// Add Plant Modal Component
+const AddPlantModal: React.FC<{
+  onClose: () => void;
+  onAdd: (plant: Omit<Plant, 'id'>) => void;
+}> = ({ onClose, onAdd }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    commonName: '',
+    wateringInterval: 7,
+    difficulty: 'kolay' as Difficulty,
+    tips: [''],
+    care: {
+      light: '',
+      temperature: '',
+      humidity: '',
+      soil: ''
+    },
+    image: ''
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.name && formData.commonName) {
+      onAdd({
+        ...formData,
+        tips: formData.tips.filter(tip => tip.trim() !== '')
+      });
+    }
+  };
+
+  const addTip = () => {
+    setFormData(prev => ({
+      ...prev,
+      tips: [...prev.tips, '']
+    }));
+  };
+
+  const updateTip = (index: number, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      tips: prev.tips.map((tip, i) => i === index ? value : tip)
+    }));
+  };
+
+  const removeTip = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      tips: prev.tips.filter((_, i) => i !== index)
+    }));
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2><i className="fas fa-plus-circle"></i> Yeni Bitki Ekle</h2>
+          <button className="close-btn" onClick={onClose}>×</button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="plant-form">
+          <div className="form-row">
+            <div className="form-group">
+              <label>Bitki Adı (Türkçe) *</label>
+              <input
+                type="text"
+                value={formData.commonName}
+                onChange={(e) => setFormData(prev => ({ ...prev, commonName: e.target.value }))}
+                placeholder="Örn: Monstera Deliciosa"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Bilimsel Adı *</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Örn: Monstera deliciosa"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label>Sulama Aralığı (Gün) *</label>
+              <input
+                type="number"
+                min="1"
+                max="365"
+                value={formData.wateringInterval}
+                onChange={(e) => setFormData(prev => ({ ...prev, wateringInterval: parseInt(e.target.value) }))}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Zorluk Seviyesi</label>
+              <select
+                value={formData.difficulty}
+                onChange={(e) => setFormData(prev => ({ ...prev, difficulty: e.target.value as Difficulty }))}
+              >
+                <option value="çok kolay">Çok Kolay</option>
+                <option value="kolay">Kolay</option>
+                <option value="orta">Orta</option>
+                <option value="zor">Zor</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Fotoğraf URL (İsteğe bağlı)</label>
+            <input
+              type="url"
+              value={formData.image}
+              onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
+              placeholder="https://example.com/image.jpg"
+            />
+          </div>
+
+          <div className="care-section">
+            <h3>Bakım Koşulları</h3>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Işık İhtiyacı</label>
+                <input
+                  type="text"
+                  value={formData.care.light}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    care: { ...prev.care, light: e.target.value }
+                  }))}
+                  placeholder="Örn: Parlak dolaylı ışık"
+                />
+              </div>
+              <div className="form-group">
+                <label>Sıcaklık</label>
+                <input
+                  type="text"
+                  value={formData.care.temperature}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    care: { ...prev.care, temperature: e.target.value }
+                  }))}
+                  placeholder="Örn: 18-25°C"
+                />
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Nem Oranı</label>
+                <input
+                  type="text"
+                  value={formData.care.humidity}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    care: { ...prev.care, humidity: e.target.value }
+                  }))}
+                  placeholder="Örn: Yüksek nem"
+                />
+              </div>
+              <div className="form-group">
+                <label>Toprak Türü</label>
+                <input
+                  type="text"
+                  value={formData.care.soil}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    care: { ...prev.care, soil: e.target.value }
+                  }))}
+                  placeholder="Örn: İyi drene olan toprak"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="tips-section">
+            <h3>Bakım İpuçları</h3>
+            {formData.tips.map((tip, index) => (
+              <div key={index} className="tip-input">
+                <input
+                  type="text"
+                  value={tip}
+                  onChange={(e) => updateTip(index, e.target.value)}
+                  placeholder="Bakım ipucu yazın..."
+                />
+                {formData.tips.length > 1 && (
+                  <button type="button" onClick={() => removeTip(index)} className="remove-tip">
+                    <i className="fas fa-times"></i>
+                  </button>
+                )}
+              </div>
+            ))}
+            <button type="button" onClick={addTip} className="add-tip-btn">
+              <i className="fas fa-plus"></i> İpucu Ekle
+            </button>
+          </div>
+
+          <div className="form-actions">
+            <button type="button" onClick={onClose} className="cancel-btn">
+              İptal
+            </button>
+            <button type="submit" className="submit-btn">
+              <i className="fas fa-save"></i> Bitki Ekle
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+)};
+
 const StatCard: React.FC<{ value: number; label: string }> = ({ value, label }) => (
   <div className="stat-card">
     <div className="stat-value">{value}</div>
@@ -161,12 +334,13 @@ const StatCard: React.FC<{ value: number; label: string }> = ({ value, label }) 
 );
 
 const App: React.FC = () => {
-  const [plants] = useState<Plant[]>(INITIAL_PLANTS);
+  const [plants, setPlants] = useState<Plant[]>(INITIAL_PLANTS);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date(2025, 5));
   const [selectedPlantId, setSelectedPlantId] = useState<number | null>(null);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [wateringHistory, setWateringHistory] = useState<Record<string, boolean>>({});
+  const [showAddPlantModal, setShowAddPlantModal] = useState<boolean>(false);
 
   // Memoized values
   const filteredPlants = useMemo(() => 
@@ -220,6 +394,12 @@ const App: React.FC = () => {
   const selectPlant = useCallback((id: number) => {
     setSelectedPlantId(prev => prev === id ? null : id);
   }, []);
+
+  const addNewPlant = useCallback((newPlant: Omit<Plant, 'id'>) => {
+    const id = Math.max(...plants.map(p => p.id)) + 1;
+    setPlants(prev => [...prev, { ...newPlant, id }]);
+    setShowAddPlantModal(false);
+  }, [plants]);
 
   // Calendar rendering
   const renderCalendar = useCallback(() => {
@@ -282,11 +462,6 @@ const App: React.FC = () => {
   return (
     <div className={`app ${isDarkMode ? 'dark-theme' : 'light-theme'}`}>
       <div className="container">
-        <div className="save-notice">
-          <i className="fas fa-save"></i>
-          Bu dosyayı bilgisayarınıza kaydedin! Sulama işaretleriniz artık kalıcı olarak saklanacak.
-        </div>
-        
         <div className="header">
           <button className="theme-toggle" onClick={() => setIsDarkMode(!isDarkMode)}>
             <i className={isDarkMode ? "fas fa-moon" : "fas fa-sun"}></i>
@@ -356,7 +531,7 @@ const App: React.FC = () => {
                 ))}
               </div>
               
-              <button className="add-plant-btn" onClick={() => alert('Yeni bitki ekleme özelliği aktifleştirilecek')}>
+              <button className="add-plant-btn" onClick={() => setShowAddPlantModal(true)}>
                 <i className="fas fa-plus"></i> Yeni Bitki Ekle
               </button>
             </div>
@@ -392,6 +567,8 @@ const App: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {showAddPlantModal && <AddPlantModal onClose={() => setShowAddPlantModal(false)} onAdd={addNewPlant} />}
       
       <style jsx>{`
         .app { 
@@ -749,6 +926,214 @@ const App: React.FC = () => {
           border-radius: 3px; 
         }
         
+        /* Modal Styles */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.7);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+          background: #1e293b;
+          border-radius: 12px;
+          width: 90%;
+          max-width: 600px;
+          max-height: 90vh;
+          overflow-y: auto;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 20px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-header h2 {
+          margin: 0;
+          color: #10b981;
+          font-size: 20px;
+        }
+        
+        .close-btn {
+          background: none;
+          border: none;
+          color: #94a3b8;
+          font-size: 24px;
+          cursor: pointer;
+          padding: 0;
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+          background: rgba(255, 255, 255, 0.1);
+          color: white;
+        }
+        
+        .plant-form {
+          padding: 20px;
+        }
+        
+        .form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 15px;
+          margin-bottom: 15px;
+        }
+        
+        .form-group {
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .form-group label {
+          font-size: 14px;
+          font-weight: 600;
+          margin-bottom: 5px;
+          color: #e2e8f0;
+        }
+        
+        .form-group input,
+        .form-group select {
+          padding: 10px;
+          border: 1px solid #475569;
+          border-radius: 6px;
+          background: rgba(255, 255, 255, 0.1);
+          color: #e2e8f0;
+          font-size: 14px;
+          transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+          outline: none;
+          border-color: #3b82f6;
+          background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .care-section,
+        .tips-section {
+          margin: 20px 0;
+          padding: 15px;
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 8px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .care-section h3,
+        .tips-section h3 {
+          margin: 0 0 15px 0;
+          color: #10b981;
+          font-size: 16px;
+        }
+        
+        .tip-input {
+          display: flex;
+          gap: 10px;
+          align-items: center;
+          margin-bottom: 10px;
+        }
+        
+        .tip-input input {
+          flex: 1;
+          padding: 8px;
+          border: 1px solid #475569;
+          border-radius: 6px;
+          background: rgba(255, 255, 255, 0.1);
+          color: #e2e8f0;
+          font-size: 14px;
+        }
+        
+        .remove-tip {
+          background: #dc2626;
+          border: none;
+          color: white;
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+        }
+        
+        .remove-tip:hover {
+          background: #b91c1c;
+          transform: scale(1.1);
+        }
+        
+        .add-tip-btn {
+          background: #059669;
+          border: none;
+          color: white;
+          padding: 8px 12px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 12px;
+          transition: all 0.3s ease;
+        }
+        
+        .add-tip-btn:hover {
+          background: #047857;
+        }
+        
+        .form-actions {
+          display: flex;
+          gap: 15px;
+          justify-content: flex-end;
+          margin-top: 25px;
+          padding-top: 20px;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .cancel-btn {
+          background: #6b7280;
+          border: none;
+          color: white;
+          padding: 12px 20px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 500;
+          transition: all 0.3s ease;
+        }
+        
+        .cancel-btn:hover {
+          background: #4b5563;
+        }
+        
+        .submit-btn {
+          background: #059669;
+          border: none;
+          color: white;
+          padding: 12px 20px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 500;
+          transition: all 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+          background: #047857;
+          transform: translateY(-1px);
+        }
+        
         @media (max-width: 768px) {
           .main-content { 
             grid-template-columns: 1fr; 
@@ -765,6 +1150,13 @@ const App: React.FC = () => {
           }
           .plant-item { 
             font-size: 9px; 
+          }
+          .form-row {
+            grid-template-columns: 1fr;
+          }
+          .modal-content {
+            width: 95%;
+            margin: 10px;
           }
         }
       `}</style>
